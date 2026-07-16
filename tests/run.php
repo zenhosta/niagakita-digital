@@ -1,0 +1,58 @@
+<?php
+declare(strict_types=1);
+
+$root = dirname(__DIR__);
+$source = file_get_contents($root . '/index.php');
+$failures = [];
+
+function expect(bool $condition, string $message): void {
+    global $failures;
+    if (!$condition) $failures[] = $message;
+}
+
+// Every application route must have a route handler and state-changing routes use CSRF.
+$routes = [
+    '/install', '/install/database', '/install/admin', '/install/license',
+    '/admin/login', '/admin/logout', '/admin', '/admin/appearance',
+    '/admin/products', '/admin/products/new', '/admin/orders', '/admin/settings',
+    '/admin/settings/test-smtp', '/webhooks/pakasir', '/checkout/', '/invoice/',
+    '/produk/', '/media/',
+];
+foreach ($routes as $route) expect(str_contains($source, $route), "Route hilang: $route");
+
+foreach ([
+    "'/admin/products/new' && \$method === 'POST'",
+    "'/admin/settings' && \$method==='POST'",
+    "'/admin/appearance' && \$method === 'POST'",
+    "'/admin/settings/test-smtp' && \$method==='POST'",
+] as $handler) {
+    $position = strpos($source, $handler);
+    expect($position !== false, "Handler POST hilang: $handler");
+    if ($position !== false) expect(str_contains(substr($source, $position, 180), 'check_csrf()'), "CSRF tidak dipakai: $handler");
+}
+
+// Forms must use centralized markup helper instead of fragile inline quoting.
+expect(str_contains($source, "function hidden_csrf(string \$token)"), 'Helper hidden CSRF hilang');
+expect(str_contains($source, "action=\"'.base('/admin/products/new').'\">'.hidden_csrf(\$csrf)"), 'Form produk baru tidak memakai helper CSRF');
+expect(str_contains($source, "action=\"'.base('/admin/settings').'\">'.hidden_csrf(\$csrf)"), 'Form settings tidak memakai helper CSRF');
+
+// Account stock requires email|password, one line per account.
+function parseStockForTest(string $input): ?array {
+    $accounts = [];
+    foreach (preg_split('/\R/', trim($input)) as $line) {
+        $parts = explode('|', trim($line), 2);
+        if (count($parts) !== 2 || !filter_var(trim($parts[0]), FILTER_VALIDATE_EMAIL) || trim($parts[1]) === '') return null;
+        $accounts[] = trim($parts[0]) . '|' . trim($parts[1]);
+    }
+    return $accounts;
+}
+expect(parseStockForTest("email@gmail.com|password\nuser@example.com|secret") === ['email@gmail.com|password', 'user@example.com|secret'], 'Parser stok valid gagal');
+expect(parseStockForTest('email@gmail.com:password') === null, 'Parser stok menerima delimiter salah');
+expect(parseStockForTest('not-an-email|password') === null, 'Parser stok menerima email salah');
+
+if ($failures) {
+    fwrite(STDERR, "FAIL\n- " . implode("\n- ", $failures) . "\n");
+    exit(1);
+}
+
+echo "PASS: route contract, CSRF, stock parser\n";
