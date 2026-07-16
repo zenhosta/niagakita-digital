@@ -1,3 +1,5 @@
 .env
 storage/installed.lock
 storage/*.log
+storage/uploads/*
+!storage/uploads/.gitkeep
