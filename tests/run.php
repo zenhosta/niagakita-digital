@@ -23,6 +23,11 @@ expect(str_contains($source, 'function pakasir_transaction(array $order)'), 'Pak
 expect(str_contains($source, 'https://app.pakasir.com/api/transactiondetail?'), 'Endpoint Transaction Detail Pakasir salah atau hilang');
 expect(str_contains($source, 'sync_pakasir_payment($o)'), 'Invoice tidak melakukan cek mandiri ke Pakasir');
 expect(str_contains($source, 'Cek ulang status'), 'Tombol cek ulang invoice hilang');
+expect(str_contains($source, 'name="email_note"'), 'Field catatan email produk hilang');
+expect(str_contains($source, 'delivery_url,email_note'), 'Catatan email tidak disnapshot ke order item');
+foreach (['Invoice:', 'Produk:', 'Jenis:', 'Harga:', 'CATATAN DARI PENJUAL'] as $detail) {
+    expect(str_contains($source, $detail), "Detail fulfillment email hilang: $detail");
+}
 
 foreach ([
     "'/admin/products/new' && \$method === 'POST'",
