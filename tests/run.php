@@ -23,6 +23,8 @@ expect(str_contains($source, 'function pakasir_transaction(array $order)'), 'Pak
 expect(str_contains($source, 'https://app.pakasir.com/api/transactiondetail?'), 'Endpoint Transaction Detail Pakasir salah atau hilang');
 expect(str_contains($source, 'sync_pakasir_payment($o)'), 'Invoice tidak melakukan cek mandiri ke Pakasir');
 expect(str_contains($source, 'Cek ulang status'), 'Tombol cek ulang invoice hilang');
+expect(str_contains($source, 'function validate_pakasir_webhook'), 'Validator webhook Pakasir hilang');
+expect(str_contains($source, 'fulfill_order($order);http_response_code(200)'), 'Webhook completed tidak menjalankan fulfillment');
 expect(str_contains($source, 'stock_total'), 'Jumlah stok publik tidak dihitung');
 expect(str_contains($source, "'/admin/stocks' && \$method === 'GET'"), 'Halaman admin stok hilang');
 expect(str_contains($source, '/admin/stocks/(\\d+)/delete'), 'Aksi hapus stok hilang');
@@ -63,6 +65,19 @@ function parseStockForTest(string $input): ?array {
 expect(parseStockForTest("email@gmail.com|password\nuser@example.com|secret") === ['email@gmail.com|password', 'user@example.com|secret'], 'Parser stok valid gagal');
 expect(parseStockForTest('email@gmail.com:password') === null, 'Parser stok menerima delimiter salah');
 expect(parseStockForTest('not-an-email|password') === null, 'Parser stok menerima email salah');
+
+// Pakasir docs webhook fixture: completed + amount + order_id + project.
+function validatePakasirWebhookForTest(mixed $body): ?string {
+    if (!is_array($body)) return 'Payload JSON tidak valid';
+    if (($body['status'] ?? '') !== 'completed') return 'Status pembayaran bukan completed';
+    if (!isset($body['amount'], $body['order_id'], $body['project']) || !is_numeric($body['amount']) || !is_string($body['order_id']) || !is_string($body['project'])) return 'Field webhook tidak lengkap';
+    return null;
+}
+$webhook = ['amount' => 120000, 'order_id' => 'ZTH-20260716-JWQPWFZ_', 'project' => 'sound-on', 'status' => 'completed', 'payment_method' => 'qris'];
+expect(validatePakasirWebhookForTest($webhook) === null, 'Webhook completed valid ditolak');
+$webhook['status'] = 'pending';
+expect(validatePakasirWebhookForTest($webhook) !== null, 'Webhook pending diterima');
+expect(validatePakasirWebhookForTest(['status' => 'completed']) !== null, 'Webhook field tidak lengkap diterima');
 
 if ($failures) {
     fwrite(STDERR, "FAIL\n- " . implode("\n- ", $failures) . "\n");
