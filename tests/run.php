@@ -14,7 +14,7 @@ function expect(bool $condition, string $message): void {
 $routes = [
     '/install', '/install/database', '/install/admin', '/install/license',
     '/admin/login', '/admin/logout', '/admin', '/admin/appearance',
-    '/admin/products', '/admin/products/new', '/admin/orders', '/admin/settings',
+    '/admin/products', '/admin/products/new', '/admin/stocks', '/admin/orders', '/admin/settings',
     '/admin/settings/test-smtp', '/webhooks/pakasir', '/checkout/', '/invoice/',
     '/produk/', '/media/',
 ];
@@ -23,6 +23,9 @@ expect(str_contains($source, 'function pakasir_transaction(array $order)'), 'Pak
 expect(str_contains($source, 'https://app.pakasir.com/api/transactiondetail?'), 'Endpoint Transaction Detail Pakasir salah atau hilang');
 expect(str_contains($source, 'sync_pakasir_payment($o)'), 'Invoice tidak melakukan cek mandiri ke Pakasir');
 expect(str_contains($source, 'Cek ulang status'), 'Tombol cek ulang invoice hilang');
+expect(str_contains($source, 'stock_total'), 'Jumlah stok publik tidak dihitung');
+expect(str_contains($source, "'/admin/stocks' && \$method === 'GET'"), 'Halaman admin stok hilang');
+expect(str_contains($source, '/admin/stocks/(\\d+)/delete'), 'Aksi hapus stok hilang');
 expect(str_contains($source, 'name="email_note"'), 'Field catatan email produk hilang');
 expect(str_contains($source, 'delivery_url,email_note'), 'Catatan email tidak disnapshot ke order item');
 foreach (['Invoice:', 'Produk:', 'Jenis:', 'Harga:', 'CATATAN DARI PENJUAL'] as $detail) {
