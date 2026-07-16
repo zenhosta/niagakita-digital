@@ -1,0 +1,14 @@
+RewriteEngine On
+
+# Keep configuration, schema, and runtime files out of web access.
+RewriteRule ^(?:app\.php|composer\.(?:json|lock)|database(?:/|$)|storage(?:/|$)|vendor(?:/|$)|\.env) - [F,L,NC]
+
+<FilesMatch "^(?:\.env|\.git|\.ht)">
+    Require all denied
+</FilesMatch>
+
+Options -Indexes
+
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^ index.php [QSA,L]

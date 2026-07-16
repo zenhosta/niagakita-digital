@@ -1,0 +1,6 @@
+{
+  "license": "proprietary",
+  "require": {
+    "phpmailer/phpmailer": "^6.9"
+  }
+}
