@@ -28,12 +28,7 @@ cd ~/public_html
 git clone https://github.com/zenhosta/niagakita-digital.git .
 ```
 
-6. Install dependency production.
-
-```bash
-composer install --no-dev --optimize-autoloader
-```
-
+6. Dependency `vendor/` sudah termasuk repository. Composer tidak diperlukan untuk instalasi standar.
 7. Pastikan folder runtime dapat ditulis user cPanel.
 
 ```bash
@@ -80,7 +75,6 @@ Backup database dan `.env` sebelum update.
 ```bash
 cd ~/public_html
 git pull origin main
-composer install --no-dev --optimize-autoloader
 ```
 
 Jangan hapus:
