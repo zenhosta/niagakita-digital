@@ -14,7 +14,7 @@ function expect(bool $condition, string $message): void {
 $routes = [
     '/install', '/install/database', '/install/admin', '/install/license',
     '/admin/login', '/admin/logout', '/admin', '/admin/appearance',
-    '/admin/products', '/admin/products/new', '/admin/stocks', '/admin/orders', '/admin/reports', '/admin/settings',
+    '/admin/products', '/admin/products/new', '/admin/stocks', '/admin/orders', '/admin/orders/', '/admin/reports', '/admin/settings',
     '/admin/settings/test-smtp', '/webhooks/pakasir', '/webhook/pakasir', '/pakasir/webhook', '/api/pakasir/webhook', '/checkout/', '/invoice/',
     '/produk/', '/media/',
 ];
@@ -32,6 +32,10 @@ expect(str_contains($source, "'/admin/stocks' && \$method === 'GET'"), 'Halaman 
 expect(str_contains($source, '/admin/stocks/(\\d+)/delete'), 'Aksi hapus stok hilang');
 expect(str_contains($source, "status='fulfilled'"), 'Laporan omzet harus menghitung pesanan berhasil saja');
 expect(str_contains($source, 'Rekap harian'), 'Tabel laporan omzet hilang');
+expect(str_contains($source, "/admin/orders/(\\d+)/check"), 'Route cek Pakasir admin hilang');
+expect(str_contains($source, "/admin/orders/(\\d+)/validate"), 'Route validasi manual admin hilang');
+expect(str_contains($source, 'Cek Pakasir'), 'Tombol cek Pakasir admin hilang');
+expect(str_contains($source, 'Validasi manual'), 'Tombol validasi manual admin hilang');
 expect(str_contains($source, 'name="email_note"'), 'Field catatan email produk hilang');
 expect(str_contains($source, 'delivery_url,email_note'), 'Catatan email tidak disnapshot ke order item');
 foreach (['Invoice:', 'Produk:', 'Jenis:', 'Harga:', 'CATATAN DARI PENJUAL'] as $detail) {
@@ -43,6 +47,8 @@ foreach ([
     "'/admin/settings' && \$method==='POST'",
     "'/admin/appearance' && \$method === 'POST'",
     "'/admin/settings/test-smtp' && \$method==='POST'",
+    "/admin/orders/(\\d+)/check",
+    "/admin/orders/(\\d+)/validate",
 ] as $handler) {
     $position = strpos($source, $handler);
     expect($position !== false, "Handler POST hilang: $handler");
