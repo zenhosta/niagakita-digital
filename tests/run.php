@@ -15,7 +15,7 @@ $routes = [
     '/install', '/install/database', '/install/admin', '/install/license',
     '/admin/login', '/admin/logout', '/admin', '/admin/appearance',
     '/admin/products', '/admin/products/new', '/admin/stocks', '/admin/orders', '/admin/reports', '/admin/settings',
-    '/admin/settings/test-smtp', '/webhooks/pakasir', '/webhook/pakasir', '/pakasir/webhook', '/checkout/', '/invoice/',
+    '/admin/settings/test-smtp', '/webhooks/pakasir', '/webhook/pakasir', '/pakasir/webhook', '/api/pakasir/webhook', '/checkout/', '/invoice/',
     '/produk/', '/media/',
 ];
 foreach ($routes as $route) expect(str_contains($source, $route), "Route hilang: $route");
