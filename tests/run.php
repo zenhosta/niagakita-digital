@@ -25,6 +25,8 @@ expect(str_contains($source, 'sync_pakasir_payment($o)'), 'Invoice tidak melakuk
 expect(str_contains($source, 'Cek ulang status'), 'Tombol cek ulang invoice hilang');
 expect(str_contains($source, 'function validate_pakasir_webhook'), 'Validator webhook Pakasir hilang');
 expect(str_contains($source, 'fulfill_order($order);http_response_code(200)'), 'Webhook completed tidak menjalankan fulfillment');
+expect(str_contains($source, 'Order ID Pakasir yang dicek:'), 'Invoice tidak menampilkan Order ID Pakasir yang dicek');
+expect(str_contains($source, '?check=1'), 'Tombol cek ulang tidak memakai URL eksplisit');
 expect(str_contains($source, 'stock_total'), 'Jumlah stok publik tidak dihitung');
 expect(str_contains($source, "'/admin/stocks' && \$method === 'GET'"), 'Halaman admin stok hilang');
 expect(str_contains($source, '/admin/stocks/(\\d+)/delete'), 'Aksi hapus stok hilang');
@@ -87,6 +89,17 @@ expect(validatePakasirWebhookForTest($webhook) === null, 'Webhook completed vali
 $webhook['status'] = 'pending';
 expect(validatePakasirWebhookForTest($webhook) !== null, 'Webhook pending diterima');
 expect(validatePakasirWebhookForTest(['status' => 'completed']) !== null, 'Webhook field tidak lengkap diterima');
+
+// Payment mapping: a completed webhook may settle only its own local order.
+function webhookMatchesOrderForTest(array $webhook, array $order, string $project): bool {
+    return ($webhook['status'] ?? '') === 'completed'
+        && ($webhook['order_id'] ?? '') === $order['invoice']
+        && (int) ($webhook['amount'] ?? -1) === (int) $order['total']
+        && ($webhook['project'] ?? '') === $project;
+}
+$paidWebhook = ['amount' => 120000, 'order_id' => 'ZTH-20260716-JWQPWFZ_', 'project' => 'sound-on', 'status' => 'completed'];
+expect(webhookMatchesOrderForTest($paidWebhook, ['invoice' => 'ZTH-20260716-JWQPWFZ_', 'total' => 120000], 'sound-on'), 'Webhook invoice yang cocok tidak dapat diproses');
+expect(!webhookMatchesOrderForTest($paidWebhook, ['invoice' => 'ZTH-20260716-S6JZF-3O', 'total' => 120000], 'sound-on'), 'Webhook invoice berbeda tidak boleh memproses order lain');
 
 if ($failures) {
     fwrite(STDERR, "FAIL\n- " . implode("\n- ", $failures) . "\n");
