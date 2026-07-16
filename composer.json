@@ -1,6 +1,8 @@
 {
   "license": "proprietary",
   "require": {
-    "phpmailer/phpmailer": "^6.9"
+    "phpmailer/phpmailer": "^6.9",
+    "dompdf/dompdf": "^3.1",
+    "endroid/qr-code": "^6.0"
   }
 }

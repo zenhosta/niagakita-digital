@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 $root = dirname(__DIR__);
 $source = file_get_contents($root . '/index.php');
+$appSource = file_get_contents($root . '/app.php');
 $failures = [];
 
 function expect(bool $condition, string $message): void {
@@ -16,6 +17,7 @@ $routes = [
     '/admin/login', '/admin/logout', '/admin', '/admin/appearance',
     '/admin/products', '/admin/products/new', '/admin/stocks', '/admin/orders', '/admin/orders/', '/admin/reports', '/admin/settings',
     '/admin/settings/test-smtp', '/webhooks/pakasir', '/webhook/pakasir', '/pakasir/webhook', '/api/pakasir/webhook', '/checkout/', '/invoice/',
+    '/admin/invoices', '/admin/transactions', '/admin/settings/database', '/admin/settings/database/migrate',
     '/produk/', '/media/',
 ];
 foreach ($routes as $route) expect(str_contains($source, $route), "Route hilang: $route");
@@ -82,6 +84,11 @@ function formatAccountCredentialsForTest(string $payload): string {
 expect(formatAccountCredentialsForTest('email@gmail.com|pass123') === "Email: email@gmail.com\nPassword: pass123", 'Email/password tidak diberi label');
 expect(formatAccountCredentialsForTest('username|pass123') === 'username|pass123', 'Format non-email tidak boleh diubah');
 expect(str_contains($source, 'function format_account_credentials'), 'Formatter kredensial email hilang');
+expect(str_contains($appSource, 'function run_pending_migrations'), 'Migration runner hilang');
+expect(str_contains($appSource, 'schema_migrations'), 'Tracking migration hilang');
+expect(str_contains($source, 'create_invoice_pdf'), 'Generator invoice PDF hilang');
+expect(str_contains($source, 'send_invoice_email'), 'Email invoice pending hilang');
+expect(str_contains($source, 'Content-Type: application/pdf'), 'Download PDF invoice hilang');
 
 // Pakasir docs webhook fixture: completed + amount + order_id + project.
 function validatePakasirWebhookForTest(mixed $body): ?string {

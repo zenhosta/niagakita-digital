@@ -1,0 +1,13 @@
+ALTER TABLE orders ADD COLUMN invoice_sent_at DATETIME NULL AFTER paid_at;
+ALTER TABLE orders ADD COLUMN invoice_pdf_path VARCHAR(255) NULL AFTER invoice_sent_at;
+ALTER TABLE orders ADD COLUMN payment_url TEXT NULL AFTER invoice_pdf_path;
+ALTER TABLE orders ADD COLUMN payment_expires_at DATETIME NULL AFTER payment_url;
+ALTER TABLE payments ADD COLUMN amount BIGINT UNSIGNED NULL AFTER gateway;
+ALTER TABLE payments ADD COLUMN payment_url TEXT NULL AFTER payment_method;
+ALTER TABLE payments ADD COLUMN fee BIGINT UNSIGNED NULL AFTER amount;
+ALTER TABLE payments ADD COLUMN total_payment BIGINT UNSIGNED NULL AFTER fee;
+ALTER TABLE payments ADD COLUMN payment_number TEXT NULL AFTER total_payment;
+ALTER TABLE payments ADD COLUMN expires_at DATETIME NULL AFTER payment_number;
+ALTER TABLE payments ADD COLUMN completed_at DATETIME NULL AFTER expires_at;
+ALTER TABLE payments ADD COLUMN webhook_payload JSON NULL AFTER raw_response;
+ALTER TABLE payments ADD COLUMN verification_source VARCHAR(30) NULL AFTER webhook_payload;

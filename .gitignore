@@ -3,3 +3,5 @@ storage/installed.lock
 storage/*.log
 storage/uploads/*
 !storage/uploads/.gitkeep
+storage/invoices/*
+!storage/invoices/.gitkeep

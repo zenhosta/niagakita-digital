@@ -1,0 +1,14 @@
+CREATE TABLE IF NOT EXISTS email_logs (
+  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  order_id BIGINT UNSIGNED NULL,
+  email_type VARCHAR(30) NOT NULL,
+  recipient VARCHAR(190) NOT NULL,
+  subject VARCHAR(255) NOT NULL,
+  status VARCHAR(20) NOT NULL,
+  error_message TEXT NULL,
+  sent_at DATETIME NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  INDEX(order_id),
+  INDEX(status),
+  CONSTRAINT fk_email_logs_order FOREIGN KEY(order_id) REFERENCES orders(id) ON DELETE SET NULL
+);
