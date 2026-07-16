@@ -66,6 +66,15 @@ expect(parseStockForTest("email@gmail.com|password\nuser@example.com|secret") ==
 expect(parseStockForTest('email@gmail.com:password') === null, 'Parser stok menerima delimiter salah');
 expect(parseStockForTest('not-an-email|password') === null, 'Parser stok menerima email salah');
 
+function formatAccountCredentialsForTest(string $payload): string {
+    $parts = explode('|', $payload, 2);
+    if (count($parts) === 2 && filter_var(trim($parts[0]), FILTER_VALIDATE_EMAIL) && trim($parts[1]) !== '') return "Email: " . trim($parts[0]) . "\nPassword: " . trim($parts[1]);
+    return $payload;
+}
+expect(formatAccountCredentialsForTest('email@gmail.com|pass123') === "Email: email@gmail.com\nPassword: pass123", 'Email/password tidak diberi label');
+expect(formatAccountCredentialsForTest('username|pass123') === 'username|pass123', 'Format non-email tidak boleh diubah');
+expect(str_contains($source, 'function format_account_credentials'), 'Formatter kredensial email hilang');
+
 // Pakasir docs webhook fixture: completed + amount + order_id + project.
 function validatePakasirWebhookForTest(mixed $body): ?string {
     if (!is_array($body)) return 'Payload JSON tidak valid';
